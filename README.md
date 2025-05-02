@@ -1,2 +1,2 @@
 # Mwanaidii-Sentiment-Analysis-of-Jumia-Kilimall-and-Jiji-for-App-X-Development-Insights
-This project compares the revies of 3 online stores to see what recommendations developers for app X can take to build a more customer centric app.
+This project visualizes sentiment analysis results from user reviews across three online stores or apps, providing product teams and developers with real-time insights into customer sentiment. By highlighting trends in positive, neutral, and negative feedback, the tool help the developers of App X understand user experiences and make data-informed decisions to improve their application.
