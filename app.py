@@ -3,12 +3,12 @@ import pandas as pd
 
 # Load CSVs
 try:
-    Jumia_positive_reviews = pd.read_csv("jumia_positive_reviews.csv")
-    Jumia_negative_reviews = pd.read_csv("jumia_negative_reviews.csv")
-    Kilimall_positive_reviews = pd.read_csv("kilimall_positive_reviews.csv")
-    Kilimall_negative_reviews = pd.read_csv("kilimall_negative_reviews.csv")
-    Jiji_positive_reviews = pd.read_csv("jiji_positive_reviews.csv")
-    Jiji_negative_reviews = pd.read_csv("jiji_negative_reviews.csv")
+    Jumia_positive_reviews = pd.read_csv("Jumia_positive_reviews.csv")
+    Jumia_negative_reviews = pd.read_csv("Jumia_negative_reviews.csv")
+    Kilimall_positive_reviews = pd.read_csv("Kilimall_positive_reviews.csv")
+    Kilimall_negative_reviews = pd.read_csv("Kilimall_negative_reviews.csv")
+    Jiji_positive_reviews = pd.read_csv("Jiji_positive_reviews.csv")
+    Jiji_negative_reviews = pd.read_csv("Jiji_negative_reviews.csv")
 except Exception as e:
     st.error(f"Failed to load one or more datasets: {e}")
     st.stop()
