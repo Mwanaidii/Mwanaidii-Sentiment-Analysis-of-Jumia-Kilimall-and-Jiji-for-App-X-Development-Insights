@@ -23,6 +23,7 @@ for df in [Jumia_positive_reviews, Jumia_negative_reviews,
 st.title("Sentiment Insights from Jumia, Kilimall & Jiji Reviews")
 platform = st.selectbox("Choose a platform to view reviews", ["Jumia", "Kilimall", "Jiji"])
 
+# Function to show reviews
 def show_reviews(positive_df, negative_df):
     st.subheader("Top 10 Positive Reviews")
     try:
@@ -36,7 +37,10 @@ def show_reviews(positive_df, negative_df):
     except KeyError:
         st.error("Missing 'extracted_emojis' or 'sentiment' columns in negative reviews CSV.")
 
-# Show based on selection
+# Call the function based on user selection
 if platform == "Jumia":
     show_reviews(Jumia_positive_reviews, Jumia_negative_reviews)
 elif platform == "Kilimall":
+    show_reviews(Kilimall_positive_reviews, Kilimall_negative_reviews)
+elif platform == "Jiji":
+    show_reviews(Jiji_positive_reviews, Jiji_negative_reviews)
