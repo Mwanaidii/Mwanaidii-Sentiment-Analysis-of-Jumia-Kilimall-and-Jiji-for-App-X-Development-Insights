@@ -1,24 +1,42 @@
 import streamlit as st
 import pandas as pd
 
-# Load data
+# Load CSVs
 try:
-    Jumia_positive_reviews = pd.read_csv("path_to_jumia_positive_reviews.csv")
-    Jumia_negative_reviews = pd.read_csv("path_to_jumia_negative_reviews.csv")
+    Jumia_positive_reviews = pd.read_csv("jumia_positive_reviews.csv")
+    Jumia_negative_reviews = pd.read_csv("jumia_negative_reviews.csv")
+    Kilimall_positive_reviews = pd.read_csv("kilimall_positive_reviews.csv")
+    Kilimall_negative_reviews = pd.read_csv("kilimall_negative_reviews.csv")
+    Jiji_positive_reviews = pd.read_csv("jiji_positive_reviews.csv")
+    Jiji_negative_reviews = pd.read_csv("jiji_negative_reviews.csv")
 except Exception as e:
-    st.error(f"Failed to load data: {e}")
+    st.error(f"Failed to load one or more datasets: {e}")
     st.stop()
 
-# Sanitize column names
-Jumia_positive_reviews.columns = Jumia_positive_reviews.columns.str.strip()
-Jumia_negative_reviews.columns = Jumia_negative_reviews.columns.str.strip()
+# Clean column names in case of spaces
+for df in [Jumia_positive_reviews, Jumia_negative_reviews,
+           Kilimall_positive_reviews, Kilimall_negative_reviews,
+           Jiji_positive_reviews, Jiji_negative_reviews]:
+    df.columns = df.columns.str.strip()
 
-# Show available columns (debug)
-st.write("Jumia Positive Review Columns:", Jumia_positive_reviews.columns.tolist())
+# Streamlit UI
+st.title("Sentiment Insights from Jumia, Kilimall & Jiji Reviews")
+platform = st.selectbox("Choose a platform to view reviews", ["Jumia", "Kilimall", "Jiji"])
 
-# Display data
-st.subheader("Top 10 Positive Reviews from Jumia")
-try:
-    st.write(Jumia_positive_reviews[['extracted_emojis', 'sentiment']].head(10))
-except KeyError as e:
-    st.error(f"Missing expected columns: {e}")
+def show_reviews(positive_df, negative_df):
+    st.subheader("Top 10 Positive Reviews")
+    try:
+        st.write(positive_df[['extracted_emojis', 'sentiment']].head(10))
+    except KeyError:
+        st.error("Missing 'extracted_emojis' or 'sentiment' columns in positive reviews CSV.")
+
+    st.subheader("Top 10 Negative Reviews")
+    try:
+        st.write(negative_df[['extracted_emojis', 'sentiment']].head(10))
+    except KeyError:
+        st.error("Missing 'extracted_emojis' or 'sentiment' columns in negative reviews CSV.")
+
+# Show based on selection
+if platform == "Jumia":
+    show_reviews(Jumia_positive_reviews, Jumia_negative_reviews)
+elif platform == "Kilimall":
