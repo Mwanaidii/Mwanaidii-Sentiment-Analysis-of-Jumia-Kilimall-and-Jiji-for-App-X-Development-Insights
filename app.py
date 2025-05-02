@@ -1,13 +1,18 @@
 import streamlit as st
-
-st.title("Sentiment Analysis Dashboard")
-st.write("This is a simple Streamlit app showing customer sentiment analysis for Jumia, Kilimall, and Jiji.")
-
-# Load and display your results
 import pandas as pd
+import plotly.express as px
 
-df = pd.read_csv("your_file.csv")  # Replace with your actual file
-st.dataframe(df)
+# Load your cleaned sentiment output
+df = pd.read_csv("cleaned_reviews.csv")  # update with your real file
+
+# App title
+st.title("Sentiment Analysis Dashboard - App X Insights")
 
 # Sentiment distribution
-st.bar_chart(df['sentiment'].value_counts())
+sentiment_counts = df["sentiment"].value_counts()
+fig = px.pie(names=sentiment_counts.index, values=sentiment_counts.values, title="Sentiment Distribution")
+st.plotly_chart(fig)
+
+# Display sample reviews
+st.subheader("Sample Reviews")
+st.dataframe(df[['review', 'sentiment']].sample(5))
