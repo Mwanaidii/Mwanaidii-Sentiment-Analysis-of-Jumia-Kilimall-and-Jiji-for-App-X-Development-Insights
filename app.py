@@ -1,46 +1,46 @@
 import streamlit as st
 import pandas as pd
+from transformers import pipeline
 
-# Load CSVs
-try:
-    Jumia_positive_reviews = pd.read_csv("Jumia_positive_reviews.csv")
-    Jumia_negative_reviews = pd.read_csv("Jumia_negative_reviews.csv")
-    Kilimall_positive_reviews = pd.read_csv("Kilimall_positive_reviews.csv")
-    Kilimall_negative_reviews = pd.read_csv("Kilimall_negative_reviews.csv")
-    Jiji_positive_reviews = pd.read_csv("Jiji_positive_reviews.csv")
-    Jiji_negative_reviews = pd.read_csv("Jiji_negative_reviews.csv")
-except Exception as e:
-    st.error(f"Failed to load one or more datasets: {e}")
-    st.stop()
+# Initialize sentiment analysis model
+classifier_sentiment = pipeline("sentiment-analysis")
 
-# Clean column names in case of spaces
-for df in [Jumia_positive_reviews, Jumia_negative_reviews,
-           Kilimall_positive_reviews, Kilimall_negative_reviews,
-           Jiji_positive_reviews, Jiji_negative_reviews]:
-    df.columns = df.columns.str.strip()
+st.title("Sentiment Analysis from Emoji Reviews")
+st.markdown("Upload emoji review files for Jumia, Kilimall, or Jiji to view sentiment trends.")
 
-# Streamlit UI
-st.title("Sentiment Insights from Jumia, Kilimall & Jiji Reviews")
-platform = st.selectbox("Choose a platform to view reviews", ["Jumia", "Kilimall", "Jiji"])
+# Platform selector
+platform = st.selectbox("Select the platform", ["Jumia", "Kilimall", "Jiji"])
 
-# Function to show reviews
-def show_reviews(positive_df, negative_df):
-    st.subheader("Top 10 Positive Reviews")
+# File uploader
+uploaded_file = st.file_uploader(f"Upload your {platform} dataset (CSV)", type="csv")
+
+if uploaded_file:
     try:
-        st.write(positive_df[['extracted_emojis', 'sentiment']].head(10))
-    except KeyError:
-        st.error("Missing 'extracted_emojis' or 'sentiment' columns in positive reviews CSV.")
+        # Read the uploaded CSV
+        df = pd.read_csv(uploaded_file)
 
-    st.subheader("Top 10 Negative Reviews")
-    try:
-        st.write(negative_df[['extracted_emojis', 'sentiment']].head(10))
-    except KeyError:
-        st.error("Missing 'extracted_emojis' or 'sentiment' columns in negative reviews CSV.")
+        # Check for required column
+        if "extracted_emojis" not in df.columns:
+            st.error("Error: Column 'extracted_emojis' not found in the uploaded CSV.")
+        else:
+            with st.spinner("Performing sentiment analysis..."):
+                df["sentiment"] = df["extracted_emojis"].apply(
+                    lambda x: classifier_sentiment(x)[0]["label"] if isinstance(x, str) else "UNKNOWN"
+                )
 
-# Call the function based on user selection
-if platform == "Jumia":
-    show_reviews(Jumia_positive_reviews, Jumia_negative_reviews)
-elif platform == "Kilimall":
-    show_reviews(Kilimall_positive_reviews, Kilimall_negative_reviews)
-elif platform == "Jiji":
-    show_reviews(Jiji_positive_reviews, Jiji_negative_reviews)
+                # Get top 10 positive and negative reviews
+                positive_reviews = df[df["sentiment"] == "POSITIVE"].head(10)
+                negative_reviews = df[df["sentiment"] == "NEGATIVE"].head(10)
+
+                # Display results
+                st.subheader(f"Top 10 Positive Reviews - {platform}")
+                st.write(positive_reviews[['extracted_emojis', 'sentiment']])
+
+                st.subheader(f"Top 10 Negative Reviews - {platform}")
+                st.write(negative_reviews[['extracted_emojis', 'sentiment']])
+
+    except Exception as e:
+        st.error(f"Something went wrong while processing your file: {e}")
+else:
+    st.info(f"Upload a CSV file for {platform} with a column named 'extracted_emojis'.")
+
