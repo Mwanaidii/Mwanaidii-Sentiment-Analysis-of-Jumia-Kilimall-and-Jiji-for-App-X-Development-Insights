@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
-from transformers import pipeline
-
+from transformers import pipeline                                                                  
+# Initialize sentiment analysis model                                    
+classifier_sentiment = pipeline("sentiment-analysis")                  
 # Initialize sentiment analysis model
 classifier_sentiment = pipeline("sentiment-analysis")
 
