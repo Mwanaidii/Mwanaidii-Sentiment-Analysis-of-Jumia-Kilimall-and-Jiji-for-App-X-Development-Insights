@@ -1,7 +1,11 @@
 streamlit
-plotly
-pandas
-numpy
-scikit-learn
+google_play_scraper
+emoji
+wordcloud
+TextBlob
 transformers
 torch
+matplotlib
+seaborn
+nltk
+pandas
