@@ -54,4 +54,3 @@ if scrape_reviews_option:
     st.subheader(f"Sentiment Distribution for {platform}")
     sentiment_plot = visualize_sentiment(df)  # This will return the figure object
     st.pyplot(sentiment_plot)
-
