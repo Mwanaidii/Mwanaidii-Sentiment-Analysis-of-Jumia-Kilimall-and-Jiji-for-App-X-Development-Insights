@@ -1,47 +1,57 @@
 import streamlit as st
-import pandas as pd
-from transformers import pipeline                                                                  
-# Initialize sentiment analysis model                                    
-classifier_sentiment = pipeline("sentiment-analysis")                  
-# Initialize sentiment analysis model
-classifier_sentiment = pipeline("sentiment-analysis")
+from sentiment_analysis import analyze_sentiment, visualize_sentiment, preprocess_data
+from scraping import scrape_reviews
 
+# Streamlit Title and Description
 st.title("Sentiment Analysis from Emoji Reviews")
-st.markdown("Upload emoji review files for Jumia, Kilimall, or Jiji to view sentiment trends.")
+st.markdown("Scrape reviews directly from Jumia, Kilimall, or Jiji to view sentiment trends.")
 
-# Platform selector
+# Platform selection (dropdown)
 platform = st.selectbox("Select the platform", ["Jumia", "Kilimall", "Jiji"])
 
-# File uploader
-uploaded_file = st.file_uploader(f"Upload your {platform} dataset (CSV)", type="csv")
+# Option to scrape reviews from the platform
+scrape_reviews_option = st.button("Scrape Reviews")
 
-if uploaded_file:
-    try:
-        # Read the uploaded CSV
-        df = pd.read_csv(uploaded_file)
+if scrape_reviews_option:
+    # Set the platform ID based on the user's choice
+    if platform == "Jumia":
+        platform_id = "com.jumia.android"
+    elif platform == "Kilimall":
+        platform_id = "net.kilimall.shop"
+    elif platform == "Jiji":
+        platform_id = "com.olx.ssa.ke"
+    
+    # Scrape reviews from the platform
+    st.write(f"Scraping reviews from {platform}...")
+    df = scrape_reviews(platform_id)
 
-        # Check for required column
-        if "extracted_emojis" not in df.columns:
-            st.error("Error: Column 'extracted_emojis' not found in the uploaded CSV.")
-        else:
-            with st.spinner("Performing sentiment analysis..."):
-                df["sentiment"] = df["extracted_emojis"].apply(
-                    lambda x: classifier_sentiment(x)[0]["label"] if isinstance(x, str) else "UNKNOWN"
-                )
+    # Perform preprocessing (extract emojis and clean text)
+    df = preprocess_data(df)
+    
+    # Perform sentiment analysis
+    df = analyze_sentiment(df)
 
-                # Get top 10 positive and negative reviews
-                positive_reviews = df[df["sentiment"] == "POSITIVE"].head(10)
-                negative_reviews = df[df["sentiment"] == "NEGATIVE"].head(10)
+    # Display the top 10 positive and negative reviews
+    st.subheader(f"Top 10 Positive Reviews for {platform}")
+    top_positive_reviews = df[df['sentiment'] == 'POSITIVE'].head(10)
 
-                # Display results
-                st.subheader(f"Top 10 Positive Reviews - {platform}")
-                st.write(positive_reviews[['extracted_emojis', 'sentiment']])
+    # Drop unnecessary columns for positive reviews
+    top_positive_reviews_cleaned = top_positive_reviews.drop(columns=['reviewId', 'userName', 'userImage', 'thumbsUpCount', 'reviewCreatedVersion', 'at', 'replyContent', 'repliedAt', 'appVersion'])
 
-                st.subheader(f"Top 10 Negative Reviews - {platform}")
-                st.write(negative_reviews[['extracted_emojis', 'sentiment']])
+    # Display cleaned top 10 positive reviews
+    st.write(top_positive_reviews_cleaned[['content', 'extracted_emojis', 'sentiment']])
 
-    except Exception as e:
-        st.error(f"Something went wrong while processing your file: {e}")
-else:
-    st.info(f"Upload a CSV file for {platform} with a column named 'extracted_emojis'.")
+    st.subheader(f"Top 10 Negative Reviews for {platform}")
+    top_negative_reviews = df[df['sentiment'] == 'NEGATIVE'].head(10)
+
+    # Drop unnecessary columns for negative reviews
+    top_negative_reviews_cleaned = top_negative_reviews.drop(columns=['reviewId', 'userName', 'userImage', 'thumbsUpCount', 'reviewCreatedVersion', 'at', 'replyContent', 'repliedAt', 'appVersion'])
+
+    # Display cleaned top 10 negative reviews
+    st.write(top_negative_reviews_cleaned[['content', 'extracted_emojis', 'sentiment']])
+
+    # Visualize sentiment distribution
+    st.subheader(f"Sentiment Distribution for {platform}")
+    sentiment_plot = visualize_sentiment(df)  # This will return the figure object
+    st.pyplot(sentiment_plot)
 
